@@ -1,6 +1,5 @@
 def generate_portfolio():
-    # Example test portfolio
-    return [
+    bets = [
         {
             "match": "Augsburg vs FC Koln",
             "market": "OVER_2.5",
@@ -22,3 +21,8 @@ def generate_portfolio():
             "stake": 1.0
         }
     ]
+
+    return {
+        "total_bets": len(bets),
+        "bets": bets
+    }
