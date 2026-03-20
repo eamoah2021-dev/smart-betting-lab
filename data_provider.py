@@ -1,6 +1,6 @@
 import requests
 
-API_KEY = "YOUR_API_KEY_HERE"
+API_KEY = "39b6b04ad7cc4b0e82f6ff20162b1a98"
 
 def get_matches():
     url = "https://api.football-data.org/v4/matches"
