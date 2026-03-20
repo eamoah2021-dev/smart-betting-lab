@@ -7,11 +7,21 @@ import os
 
 app = Flask(__name__)
 
+def normalize(name):
+    return (
+        name.lower()
+        .replace("fc", "")
+        .replace("cf", "")
+        .replace(".", "")
+        .replace("club", "")
+        .strip()
+    )
+
 @app.route("/")
 def home():
     return jsonify({
-        "system": "SMART BETTING LAB V99.5",
-        "status": "LIVE + FILTERED EDGE MODE",
+        "system": "SMART BETTING LAB V99.7 CORE",
+        "status": "FULL MARKET SCANNER",
         "time": datetime.utcnow().isoformat()
     })
 
@@ -20,24 +30,61 @@ def portfolio():
     raw_matches = get_matches()
     live_odds = get_live_odds()
 
-    # ✅ FUZZY MATCHING (FIXED)
+    # ✅ MATCH ODDS PROPERLY
     for m in raw_matches:
-        home, away = m["match"].lower().split(" vs ")
+        home, away = m["match"].split(" vs ")
+        home_n = normalize(home)
+        away_n = normalize(away)
+
         for lo in live_odds:
-            lo_match = lo["match"].lower()
-            if home in lo_match and away in lo_match:
+            lo_home, lo_away = lo["match"].split(" vs ")
+            lo_home_n = normalize(lo_home)
+            lo_away_n = normalize(lo_away)
+
+            if (
+                (home_n in lo_home_n or lo_home_n in home_n)
+                and (away_n in lo_away_n or lo_away_n in away_n)
+            ):
                 m["odds"] = lo["odds"]
 
     bets = []
-    for m in raw_matches:
-        bet = build_bet(m)
 
-        # ✅ ONLY VALUE BETS
-        if bet["edge"] > 0:
-            bets.append(bet)
+    for m in raw_matches:
+
+        base = m["model_probability"]
+
+        # ✅ FULL MARKET SPACE (SCALABLE)
+        market_space = [
+            ("OVER_2.5", base),
+            ("UNDER_2.5", 1 - base),
+
+            ("BTTS_YES", base * 0.92),
+            ("BTTS_NO", 1 - (base * 0.92)),
+
+            ("HOME_WIN", base * 0.85),
+            ("DRAW", 0.25),
+            ("AWAY_WIN", 1 - (base * 0.85)),
+        ]
+
+        best_bet = None
+
+        for market_name, prob in market_space:
+            m_copy = m.copy()
+            m_copy["market"] = market_name
+            m_copy["model_probability"] = round(max(0.05, min(0.95, prob)), 2)
+
+            bet = build_bet(m_copy)
+
+            # ✅ SELECT BEST VALUE ONLY
+            if bet["edge"] > 0:
+                if best_bet is None or bet["edge"] > best_bet["edge"]:
+                    best_bet = bet
+
+        if best_bet:
+            bets.append(best_bet)
 
     return jsonify({
-        "system": "SMART BETTING LAB V99.5",
+        "system": "SMART BETTING LAB V99.7 CORE",
         "bets": bets,
         "count": len(bets)
     })
