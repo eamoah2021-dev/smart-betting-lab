@@ -1,40 +1,45 @@
-from datetime import datetime
-import uuid
+import datetime
 
-def calculate_implied_probability(odds):
-    return 1 / odds
+def build_bet(match):
+    odds = match.get("odds", 2.0)
+    prob = match.get("model_probability", 0.55)
 
-def kelly_fraction(prob, odds):
-    b = odds - 1
-    return max((b * prob - (1 - prob)) / b, 0)
+    implied_prob = 1 / odds
+    edge = prob - implied_prob
 
-def classify_tier(edge, confidence):
-    if edge > 0.08 and confidence > 0.80:
-        return "TIER1"
-    elif edge > 0.05:
-        return "TIER2"
+    # Kelly formula
+    kelly_fraction = 0
+    if edge > 0:
+        kelly_fraction = edge / (odds - 1)
+        kelly_fraction = round(min(kelly_fraction, 1), 3)
+
+    # Confidence heuristic
+    confidence = round(prob, 2)
+
+    # Tier classification
+    if edge >= 0.08:
+        tier = "TIER1"
+    elif edge >= 0.04:
+        tier = "TIER2"
     else:
-        return "TIER3"
-
-def build_bet(match_data):
-    model_prob = match_data["model_probability"]
-    odds = match_data["odds"]
-
-    implied = calculate_implied_probability(odds)
-    edge = model_prob - implied
-    kelly = kelly_fraction(model_prob, odds)
-
-    confidence = min(0.95, model_prob + edge)
-    tier = classify_tier(edge, confidence)
+        tier = "TIER3"
 
     return {
-        "match_id": str(uuid.uuid4()),
-        "league": match_data.get("league", "Unknown"),
-        "match": match_data["match"],
-        "market": match_data["market"],
+        "match_id": str(datetime.datetime.utcnow().timestamp()).replace(".", ""),
+        "match": match["match"],
+        "league": match["league"],
+        "market": match["market"],
         "odds": odds,
-        "model_probability": round(model_prob, 3),
-        "implied_probability": round(implied, 3),
+        "model_probability": prob,
+        "implied_probability": round(implied_prob, 3),
+        "edge": round(edge, 3),
+        "kelly_fraction": kelly_fraction,
+        "stake": round(kelly_fraction * 10, 2),  # Example bankroll = 10 units
+        "confidence": confidence,
+        "status": "PENDING",
+        "tier": tier,
+        "created_at": datetime.datetime.utcnow().isoformat()
+    }        "implied_probability": round(implied, 3),
         "edge": round(edge, 3),
         "confidence": round(confidence, 3),
         "tier": tier,
