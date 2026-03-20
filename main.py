@@ -2,12 +2,13 @@ from flask import Flask, jsonify
 from v99_engine import build_bet
 from datetime import datetime
 import uuid
+import os
 
 # Initialize Flask app
 app = Flask(__name__)
 
 # ================================
-# Helper routes (optional for testing)
+# Health Check Route
 # ================================
 @app.route("/")
 def home():
@@ -18,12 +19,11 @@ def home():
     })
 
 # ================================
-# Portfolio Route — returns bets
+# Portfolio Route
 # ================================
 @app.route("/portfolio")
 def portfolio():
-
-    # Example raw matches — replace with live data later
+    # Example raw matches (replace with live data later)
     raw_matches = [
         {
             "league": "Bundesliga",
@@ -43,10 +43,8 @@ def portfolio():
         }
     ]
 
-    # Build bets using the engine
     bets = [build_bet(m) for m in raw_matches]
 
-    # Return structured JSON
     return jsonify({
         "system": "SMART BETTING LAB V99.1",
         "bets": bets,
@@ -54,7 +52,8 @@ def portfolio():
     })
 
 # ================================
-# Run the Flask app (for local testing)
+# Run Flask with Render port
 # ================================
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=True, host="0.0.0.0", port=port)
