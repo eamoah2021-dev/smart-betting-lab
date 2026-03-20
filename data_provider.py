@@ -1,7 +1,7 @@
 import requests
 import random
 
-API_KEY = "YOUR_FOOTBALL_DATA_API_KEY_HERE"
+API_KEY = "59014f39c8de466b8381d0bd3ffe12a4"
 
 def get_matches():
     url = "https://api.football-data.org/v4/matches"
