@@ -1,7 +1,7 @@
 import requests
 import random
 
-API_KEY = "59014f39c8de466b8381d0bd3ffe12a4"
+API_KEY = "YOUR_FOOTBALL_DATA_API_KEY_HERE"
 
 def get_matches():
     url = "https://api.football-data.org/v4/matches"
@@ -19,7 +19,6 @@ def get_matches():
             home = m["homeTeam"]["name"]
             away = m["awayTeam"]["name"]
 
-            # ✅ REALISTIC PROBABILITY MODEL
             base = 0.48
             variation = random.uniform(-0.08, 0.12)
             model_prob = round(max(0.35, min(0.75, base + variation)), 2)
@@ -28,7 +27,7 @@ def get_matches():
                 "league": m["competition"]["name"],
                 "match": f"{home} vs {away}",
                 "market": "OVER_2.5",
-                "odds": 2.0,  # will be replaced
+                "odds": 2.0,
                 "model_probability": model_prob,
                 "kickoff": m["utcDate"]
             })
