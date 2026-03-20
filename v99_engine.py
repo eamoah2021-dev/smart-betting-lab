@@ -7,15 +7,12 @@ def build_bet(match):
     implied_prob = 1 / odds
     edge = prob - implied_prob
 
-    # Kelly
     kelly_fraction = 0
     if edge > 0:
         kelly_fraction = edge / (odds - 1)
         kelly_fraction = round(min(kelly_fraction, 1), 3)
 
-    confidence = round(prob, 2)
-
-    # Tier system
+    # Tier classification
     if edge >= 0.08:
         tier = "TIER1"
     elif edge >= 0.04:
@@ -34,7 +31,7 @@ def build_bet(match):
         "edge": round(edge, 3),
         "kelly_fraction": kelly_fraction,
         "stake": round(kelly_fraction * 10, 2),
-        "confidence": confidence,
+        "confidence": round(prob, 2),
         "status": "PENDING",
         "tier": tier,
         "created_at": datetime.datetime.utcnow().isoformat()
