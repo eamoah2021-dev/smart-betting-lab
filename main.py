@@ -1,92 +1,66 @@
-from flask import Flask, jsonify
-from v99_engine import build_bet
-from data_provider import get_matches
-from odds_provider import get_live_odds
-from datetime import datetime
+# main.py
 import os
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from v100_engine import build_bets  # Updated to V100 engine
+from pydantic import BaseModel
+from typing import List
 
-app = Flask(__name__)
+app = FastAPI(title="SMART BETTING LAB API V100")
 
-def normalize(name):
-    return (
-        name.lower()
-        .replace("fc", "")
-        .replace("cf", "")
-        .replace(".", "")
-        .replace("club", "")
-        .strip()
-    )
+# CORS settings (allow all origins for testing; restrict in production)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.route("/")
-def home():
-    return jsonify({
-        "system": "SMART BETTING LAB V99.8",
-        "status": "REALISTIC FILTERED ENGINE",
-        "time": datetime.utcnow().isoformat()
-    })
+# Request model for portfolio parameters
+class PortfolioRequest(BaseModel):
+    bankroll: float
+    leagues: List[str] = []
+    markets: List[str] = []  # Include all markets, not just over 2.5
 
-@app.route("/portfolio")
-def portfolio():
-    raw_matches = get_matches()
-    live_odds = get_live_odds()
+# Response model for bets
+class BetResponse(BaseModel):
+    confidence: float
+    edge: float
+    implied_probability: float
+    kelly_fraction: float
+    league: str
+    market: str
+    match: str
+    match_id: str
+    model_probability: float
+    odds: float
+    stake: float
+    status: str
+    tier: str
+    created_at: str
 
-    # ✅ Match odds properly
-    for m in raw_matches:
-        home, away = m["match"].split(" vs ")
-        home_n = normalize(home)
-        away_n = normalize(away)
+@app.post("/portfolio", response_model=List[BetResponse])
+def portfolio(request: PortfolioRequest):
+    """
+    Build and return betting portfolio.
+    Uses V100 engine for smart bet selection.
+    """
+    try:
+        bets = build_bets(
+            bankroll=request.bankroll,
+            leagues=request.leagues,
+            markets=request.markets  # Pass all requested markets
+        )
+        return bets
+    except Exception as e:
+        return {"error": str(e)}
 
-        for lo in live_odds:
-            lo_home, lo_away = lo["match"].split(" vs ")
-            lo_home_n = normalize(lo_home)
-            lo_away_n = normalize(lo_away)
-
-            if (
-                (home_n in lo_home_n or lo_home_n in home_n)
-                and (away_n in lo_away_n or lo_away_n in away_n)
-            ):
-                m["odds"] = lo["odds"]
-
-    bets = []
-
-    for m in raw_matches:
-        base = m["model_probability"]
-
-        market_space = [
-            ("OVER_2.5", base),
-            ("UNDER_2.5", 1 - base),
-
-            ("BTTS_YES", base * 0.9),
-            ("BTTS_NO", 1 - (base * 0.9)),
-
-            ("HOME_WIN", 0.45),
-            ("DRAW", 0.25),
-            ("AWAY_WIN", 0.30),
-        ]
-
-        best_bet = None
-
-        for market_name, prob in market_space:
-            m_copy = m.copy()
-            m_copy["market"] = market_name
-            m_copy["model_probability"] = round(max(0.05, min(0.95, prob)), 2)
-
-            bet = build_bet(m_copy)
-
-            # ✅ STRICT FILTER
-            if bet["edge"] > 0.03 and bet["odds"] != 2:
-                if best_bet is None or bet["edge"] > best_bet["edge"]:
-                    best_bet = bet
-
-        if best_bet:
-            bets.append(best_bet)
-
-    return jsonify({
-        "system": "SMART BETTING LAB V99.8",
-        "bets": bets,
-        "count": len(bets)
-    })
+# Optional health check endpoint
+@app.get("/health")
+def health():
+    return {"status": "OK", "system": "SMART BETTING LAB V100"}
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
