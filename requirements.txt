@@ -1,3 +1,25 @@
-flask==2.3.2
+# FastAPI web framework
+fastapi==0.111.0
+
+# ASGI server for running FastAPI with Gunicorn
+uvicorn[standard]==0.23.2
 gunicorn==21.2.0
-requests==2.31.0
+
+# HTTP client for API calls (if your engine fetches odds or match data)
+httpx==0.26.0
+
+# Data handling and numerical operations
+pandas==2.1.0
+numpy==1.27.0
+
+# For scheduling or timing bets (optional if used)
+python-dateutil==2.8.2
+
+# JSON handling (standard lib, included, but added for completeness)
+orjson==3.9.1
+
+# Environment variable management
+python-dotenv==1.0.0
+
+# Optional: logging and debugging
+loguru==0.7.0
