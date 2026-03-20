@@ -1,6 +1,6 @@
 import requests
 
-API_KEY = "59014f39c8de466b8381d0bd3ffe12a4"  # <- Replace with your real key
+API_KEY = "3865c7e02e8dc75071e87271b92316f1"  # <- Replace with your real key
 
 def get_live_odds():
     url = f"https://api.the-odds-api.com/v4/sports/soccer_epl/odds/?apiKey={API_KEY}&regions=eu&markets=totals&oddsFormat=decimal"
