@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 from v99_engine import build_bet
+from data_provider import get_matches
 from datetime import datetime
 import os
 
@@ -8,33 +9,27 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     return jsonify({
-        "system": "SMART BETTING LAB V99.1",
-        "status": "running",
+        "system": "SMART BETTING LAB V99.2",
+        "status": "LIVE DATA MODE",
         "time": datetime.utcnow().isoformat()
     })
 
 @app.route("/portfolio")
 def portfolio():
-    raw_matches = [
-        {
-            "league": "Bundesliga",
-            "match": "Augsburg vs FC Koln",
-            "market": "OVER_2.5",
-            "odds": 1.85,
-            "model_probability": 0.64,
-            "kickoff": "2026-03-21T14:30:00Z"
-        }
-    ]
+    raw_matches = get_matches()
 
     bets = []
     for m in raw_matches:
         bets.append(build_bet(m))
 
     return jsonify({
-        "system": "SMART BETTING LAB V99.1",
-        "bets": bets
+        "system": "SMART BETTING LAB V99.2",
+        "bets": bets,
+        "count": len(bets)
     })
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
