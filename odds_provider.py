@@ -8,7 +8,6 @@ def get_live_odds():
     try:
         response = requests.get(url)
         if response.status_code != 200:
-            print("ODDS API ERROR:", response.status_code)
             return []
 
         data = response.json()
@@ -19,19 +18,19 @@ def get_live_odds():
                 home = match["home_team"]
                 away = match["away_team"]
 
-                total_odds = None
+                odds_value = None
 
                 for bookmaker in match.get("bookmakers", []):
                     for market in bookmaker.get("markets", []):
                         if market["key"] == "totals":
                             for outcome in market.get("outcomes", []):
                                 if outcome["name"] == "Over 2.5":
-                                    total_odds = outcome["price"]
+                                    odds_value = outcome["price"]
 
-                if total_odds:
+                if odds_value:
                     odds_list.append({
                         "match": f"{home} vs {away}",
-                        "odds": total_odds
+                        "odds": odds_value
                     })
 
             except:
@@ -40,5 +39,5 @@ def get_live_odds():
         return odds_list
 
     except Exception as e:
-        print("ERROR FETCHING ODDS:", str(e))
+        print("ERROR:", str(e))
         return []
