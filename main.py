@@ -20,8 +20,8 @@ def normalize(name):
 @app.route("/")
 def home():
     return jsonify({
-        "system": "SMART BETTING LAB V99.7 CORE",
-        "status": "FULL MARKET SCANNER",
+        "system": "SMART BETTING LAB V99.8",
+        "status": "REALISTIC FILTERED ENGINE",
         "time": datetime.utcnow().isoformat()
     })
 
@@ -30,7 +30,7 @@ def portfolio():
     raw_matches = get_matches()
     live_odds = get_live_odds()
 
-    # ✅ MATCH ODDS PROPERLY
+    # ✅ Match odds properly
     for m in raw_matches:
         home, away = m["match"].split(" vs ")
         home_n = normalize(home)
@@ -50,20 +50,18 @@ def portfolio():
     bets = []
 
     for m in raw_matches:
-
         base = m["model_probability"]
 
-        # ✅ FULL MARKET SPACE (SCALABLE)
         market_space = [
             ("OVER_2.5", base),
             ("UNDER_2.5", 1 - base),
 
-            ("BTTS_YES", base * 0.92),
-            ("BTTS_NO", 1 - (base * 0.92)),
+            ("BTTS_YES", base * 0.9),
+            ("BTTS_NO", 1 - (base * 0.9)),
 
-            ("HOME_WIN", base * 0.85),
+            ("HOME_WIN", 0.45),
             ("DRAW", 0.25),
-            ("AWAY_WIN", 1 - (base * 0.85)),
+            ("AWAY_WIN", 0.30),
         ]
 
         best_bet = None
@@ -75,8 +73,8 @@ def portfolio():
 
             bet = build_bet(m_copy)
 
-            # ✅ SELECT BEST VALUE ONLY
-            if bet["edge"] > 0:
+            # ✅ STRICT FILTER
+            if bet["edge"] > 0.03 and bet["odds"] != 2:
                 if best_bet is None or bet["edge"] > best_bet["edge"]:
                     best_bet = bet
 
@@ -84,7 +82,7 @@ def portfolio():
             bets.append(best_bet)
 
     return jsonify({
-        "system": "SMART BETTING LAB V99.7 CORE",
+        "system": "SMART BETTING LAB V99.8",
         "bets": bets,
         "count": len(bets)
     })
