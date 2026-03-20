@@ -13,7 +13,7 @@ def build_bet(match):
         kelly_fraction = edge / (odds - 1)
         kelly_fraction = round(min(kelly_fraction, 1), 3)
 
-    # Confidence heuristic
+    # Confidence = model probability
     confidence = round(prob, 2)
 
     # Tier classification
@@ -34,17 +34,9 @@ def build_bet(match):
         "implied_probability": round(implied_prob, 3),
         "edge": round(edge, 3),
         "kelly_fraction": kelly_fraction,
-        "stake": round(kelly_fraction * 10, 2),  # Example bankroll = 10 units
+        "stake": round(kelly_fraction * 10, 2),
         "confidence": confidence,
         "status": "PENDING",
         "tier": tier,
         "created_at": datetime.datetime.utcnow().isoformat()
-    }        "implied_probability": round(implied, 3),
-        "edge": round(edge, 3),
-        "confidence": round(confidence, 3),
-        "tier": tier,
-        "stake": round(kelly * 10, 2),
-        "kelly_fraction": round(kelly, 3),
-        "status": "PENDING",
-        "created_at": datetime.utcnow().isoformat()
     }
