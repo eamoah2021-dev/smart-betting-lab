@@ -1,20 +1,16 @@
 from datetime import datetime
 import uuid
 
+# Calculate implied probability from odds
 def calculate_implied_probability(odds):
     return 1 / odds
 
-
-def calculate_edge(model_prob, odds):
-    implied = calculate_implied_probability(odds)
-    return model_prob - implied
-
-
+# Kelly Fraction for stake sizing
 def kelly_fraction(prob, odds):
     b = odds - 1
     return max((b * prob - (1 - prob)) / b, 0)
 
-
+# Tier classification
 def classify_tier(edge, confidence):
     if edge > 0.08 and confidence > 0.80:
         return "TIER1"
@@ -23,7 +19,7 @@ def classify_tier(edge, confidence):
     else:
         return "TIER3"
 
-
+# Build professional bet object
 def build_bet(match_data):
     model_prob = match_data["model_probability"]
     odds = match_data["odds"]
@@ -33,7 +29,6 @@ def build_bet(match_data):
     kelly = kelly_fraction(model_prob, odds)
 
     confidence = min(0.95, model_prob + edge)
-
     tier = classify_tier(edge, confidence)
 
     return {
