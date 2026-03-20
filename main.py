@@ -22,7 +22,7 @@ def home():
 # -------------------------------
 @app.route("/portfolio")
 def portfolio():
-    # Example matches (replace with live data later)
+    # Example raw matches (replace with live data later)
     raw_matches = [
         {
             "league": "Bundesliga",
@@ -36,6 +36,27 @@ def portfolio():
             "league": "Premier League",
             "match": "Manchester United vs Arsenal",
             "market": "OVER_2.5",
+            "odds": 1.95,
+            "model_probability": 0.62,
+            "kickoff": "2026-03-22T16:00:00Z"
+        }
+    ]
+
+    # Build professional bets
+    bets = [build_bet(m) for m in raw_matches]
+
+    return jsonify({
+        "system": "SMART BETTING LAB V99.1",
+        "bets": bets,
+        "generated_at": datetime.utcnow().isoformat()
+    })
+
+# -------------------------------
+# Run Flask with Render port
+# -------------------------------
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=True, host="0.0.0.0", port=port)            "market": "OVER_2.5",
             "odds": 1.95,
             "model_probability": 0.62,
             "kickoff": "2026-03-22T16:00:00Z"
