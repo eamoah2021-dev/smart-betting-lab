@@ -1,6 +1,6 @@
 import requests
 
-API_KEY = "3865c7e02e8dc75071e87271b92316f1"  # <- Replace with your real key
+API_KEY = "3865c7e02e8dc75071e87271b92316f1"
 
 def get_live_odds():
     url = f"https://api.the-odds-api.com/v4/sports/soccer_epl/odds/?apiKey={API_KEY}&regions=eu&markets=totals&oddsFormat=decimal"
@@ -32,9 +32,10 @@ def get_live_odds():
                     })
             except:
                 continue
-
         return odds_list
-
+    except Exception as e:
+        print("ERROR FETCHING ODDS:", str(e))
+        return []
     except Exception as e:
         print("ERROR FETCHING ODDS:", str(e))
         return []
