@@ -2,21 +2,20 @@ import datetime
 
 def build_bet(match):
     odds = match.get("odds", 2.0)
-    prob = match.get("model_probability", 0.55)
+    prob = match.get("model_probability", 0.5)
 
     implied_prob = 1 / odds
     edge = prob - implied_prob
 
-    # Kelly formula
+    # Kelly
     kelly_fraction = 0
     if edge > 0:
         kelly_fraction = edge / (odds - 1)
         kelly_fraction = round(min(kelly_fraction, 1), 3)
 
-    # Confidence = model probability
     confidence = round(prob, 2)
 
-    # Tier classification
+    # Tier system
     if edge >= 0.08:
         tier = "TIER1"
     elif edge >= 0.04:
