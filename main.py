@@ -10,8 +10,8 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     return jsonify({
-        "system": "SMART BETTING LAB V99.3",
-        "status": "LIVE ODDS MODE",
+        "system": "SMART BETTING LAB V99.4",
+        "status": "LIVE ODDS + EDGE MODE",
         "time": datetime.utcnow().isoformat()
     })
 
@@ -20,7 +20,7 @@ def portfolio():
     raw_matches = get_matches()
     live_odds = get_live_odds()
 
-    # Merge live odds into raw matches
+    # Merge live odds
     for m in raw_matches:
         for lo in live_odds:
             if lo["match"] == m["match"]:
@@ -31,10 +31,14 @@ def portfolio():
         bets.append(build_bet(m))
 
     return jsonify({
-        "system": "SMART BETTING LAB V99.3",
+        "system": "SMART BETTING LAB V99.4",
         "bets": bets,
         "count": len(bets)
     })
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)    })
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
